@@ -1,0 +1,54 @@
+---
+title: "Day 8 Activities"
+author: "Jessica French"
+date: "2022-08-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(here)
+
+library(patchwork)
+library(ggrepel)
+library(gghighlight)
+library(paletteer)
+library(ggExtra)
+library(ggbeeswarm)
+library(gapminder)
+
+library(sf)
+
+```
+
+```{r}
+space_launch <- read_csv(here("data", "space_launches.csv"))
+
+
+
+```
+
+## The worst plot
+
+```{r}
+the_worst_plot <- ggplot(data = space_launch, 
+                         aes(x = launch_year)) +
+  geom_histogram(aes(fill = agency_type)) +
+  theme(panel.background = element_rect(fill = "magenta"),
+        axis.title.x = element_text(color = "magenta"),
+        text = element_text(family = "Comic Sans MS")) +
+  scale_fill_paletteer_d(palette = "ggsci::hallmarks_light_cosmic") +
+  annotate("text", x = 1969, y = 300, label = "moon landing", color = "green", size = 10) +
+  geom_vline(xintercept = 1969, linetype = "solid", color = "green") +
+  labs(x = "LAUNCH YEAR",
+       y = "NUMBER OF LAUNCHES",
+       title = "Launches by Year and also Agency Type") 
+
+the_worst_plot
+```
+
