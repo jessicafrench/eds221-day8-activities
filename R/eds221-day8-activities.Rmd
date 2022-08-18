@@ -50,5 +50,72 @@ the_worst_plot <- ggplot(data = space_launch,
        title = "Launches by Year and also Agency Type") 
 
 the_worst_plot
+
+ggsave(here("the_worst_plot.png"))
+```
+
+#Task 2
+
+```{r}
+greenhouse_gas <- read_csv(here("data", "San_Francisco_Communitywide_Greenhouse_Gas_Inventory.csv"))
+
+greenhouse_gas_by_sector <- greenhouse_gas |> 
+  group_by(Sector_General, Calendar_Year) |> 
+  summarize(sum(Emissions_mtCO2e))
+  
+greenhouse_gas_by_sector
+
+greenhouse_gas_by_year_commodity <- greenhouse_gas |> 
+  group_by(Commodity_Type, Calendar_Year) |> 
+  summarize(sum(Emissions_mtCO2e))
+
+greenhouse_gas_by_year_commodity
+
+greenhouse_gas_subset <- greenhouse_gas |> 
+  filter(Calendar_Year >= 2005, str_detect(string = Sector_Detail2, pattern = "PG&E")) |> 
+  select(Calendar_Year, Sector_Detail2, Emissions_mtCO2e)
+
+```
+
+```{r}
+The_90s <- seq(from = 1990, to = 1999)
+The_00s <- seq(from = 2000, to = 2009)
+The_10s <- seq(from = 2010, to = 2019)
+
+greenhouse_gas_decade <- greenhouse_gas |> 
+  mutate(decade = case_when(Calendar_Year %in% The_90s ~ "1990s",
+                            Calendar_Year %in% The_00s ~ "2000s",
+                            Calendar_Year %in% The_10s ~ "2010s"
+  )) |> 
+  mutate(emissions_gt = Emissions_mtCO2e / 1000) |> 
+  group_by(Sector_General, decade) |> 
+  summarize(emissions_tot_gt = sum(emissions_gt, na.rm = TRUE)) 
+ 
+```
+
+```{r}
+best_plot_ever <- ggplot(data = greenhouse_gas_decade,
+                          aes(y = fct_reorder(Sector_General, emissions_tot_gt),
+                              x = emissions_tot_gt)) +
+  geom_col(aes(fill = emissions_tot_gt), show.legend = FALSE) +
+  scale_fill_paletteer_c(palette = "ggthemes::Red") +
+  labs(x = "CO2 Emissions (gigatons)",
+       y = "Sector",
+       title = "San Francisco Community Wide CO2 Inventory",
+       subtitle = "by sector and decade",
+       caption = "Data obtained from data.sfgov.org") +
+  theme_minimal() +
+  theme(plot.caption = element_text(hjust = 0),
+        plot.title.position = "panel",
+        panel.background = element_rect(color = "white"),
+        plot.background = element_rect(color = "white")) +
+  annotate("text", x = 2200, y = "Buildings", label = "1990s") +
+  annotate("text", x = 8400, y = "Buildings", label = "2000s") +
+  annotate("text", x = 20000, y = "Buildings", label = "2010s")
+
+
+best_plot_ever
+
+ggsave(here("a_very_good_plot.jpeg"))
 ```
 
